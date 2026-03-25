@@ -3,8 +3,6 @@ on:
   workflow_dispatch:
   push:
     branches: [feat/draft-angle]
-    paths:
-      - 'packages/replicad-opencascadejs/build-source/**'
 
 jobs:
   build:
