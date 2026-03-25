@@ -1,0 +1,51 @@
+name: Build OCCT WASM
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/draft-angle]
+    paths:
+      - 'packages/replicad-opencascadejs/build-source/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install ytt
+        run: |
+          curl -L https://carvel.dev/install.sh | K14SIO_INSTALL_BIN_DIR=/usr/local/bin bash
+
+      - name: Generate build config
+        working-directory: packages/replicad-opencascadejs
+        run: pnpm run generateConfig
+
+      - name: Verify DraftAngle in config
+        run: grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/build-config/custom_build_single.yml
+
+      - name: Build WASM (single)
+        working-directory: packages/replicad-opencascadejs/build-config
+        run: |
+          docker run --rm -v "$(pwd):/src" -u "$(id -u):$(id -g)" donalffons/opencascade.js custom_build_single.yml
+
+      - name: Move build output
+        working-directory: packages/replicad-opencascadejs
+        run: mv build-config/replicad_single* src/
+
+      - name: Verify DraftAngle in types
+        run: grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/src/replicad_single.d.ts
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: replicad-opencascadejs-wasm
+          path: |
+            packages/replicad-opencascadejs/src/replicad_single.wasm
+            packages/replicad-opencascadejs/src/replicad_single.js
+            packages/replicad-opencascadejs/src/replicad_single.d.ts
+          retention-days: 30
