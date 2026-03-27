@@ -254,7 +254,7 @@
 
     - symbol: ShapeFix_EdgeConnect
 
-    # Sheet metal support
+    #! Sheet metal support
     - symbol: ShapeAnalysis_FreeBounds
     - symbol: ShapeAnalysis_Shell
     - symbol: ShapeAnalysis_Surface
