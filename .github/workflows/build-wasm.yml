@@ -2,7 +2,7 @@ name: Build OCCT WASM
 on:
   workflow_dispatch:
   push:
-    branches: [feat/draft-angle]
+    branches: [feat/draft-angle, feat/sheet-metal]
 
 jobs:
   build:
@@ -21,8 +21,11 @@ jobs:
         working-directory: packages/replicad-opencascadejs
         run: pnpm run generateConfig
 
-      - name: Verify DraftAngle in config
-        run: grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/build-config/custom_build_single.yml
+      - name: Verify sheet metal APIs in config
+        run: |
+          grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/build-config/custom_build_single.yml
+          grep "ShapeAnalysis_FreeBounds" packages/replicad-opencascadejs/build-config/custom_build_single.yml
+          grep "BRepBuilderAPI_Sewing" packages/replicad-opencascadejs/build-config/custom_build_single.yml
 
       - name: Build WASM (single)
         working-directory: packages/replicad-opencascadejs/build-config
@@ -33,8 +36,10 @@ jobs:
         working-directory: packages/replicad-opencascadejs
         run: mv build-config/replicad_single* src/
 
-      - name: Verify DraftAngle in types
-        run: grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/src/replicad_single.d.ts
+      - name: Verify APIs in types
+        run: |
+          grep "BRepOffsetAPI_DraftAngle" packages/replicad-opencascadejs/src/replicad_single.d.ts
+          grep "ShapeAnalysis_FreeBounds" packages/replicad-opencascadejs/src/replicad_single.d.ts
 
       - name: Upload WASM artifacts
         uses: actions/upload-artifact@v4
